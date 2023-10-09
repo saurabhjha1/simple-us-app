@@ -1,0 +1,40 @@
+front:
+  image:
+    repository: saurabhjha1/simple-us-app-front
+    tag: latest
+  env:
+    SINGLE_US: "true"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+back:
+  image:
+    repository: saurabhjha1/simple-us-app-back
+    tag: latest
+  env:
+    INJECT_ERROR_RATE: "0"
+    INJECT_BUSY_WAIT_SECONDS: "0.1"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+nginx:
+  rateLimit:
+    zoneSize: "10"
+    rate: "100"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

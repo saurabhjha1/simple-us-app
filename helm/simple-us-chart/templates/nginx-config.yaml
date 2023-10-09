@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx-rate-limit.conf: |
+    http {
+        limit_req_zone $binary_remote_addr zone=mylimit:{{ .Values.nginx.rateLimit.zoneSize }}m rate={{ .Values.nginx.rateLimit.rate }}r/s;
+
+        server {
+            listen 80;
+
+            location / {
+                limit_req zone=mylimit burst=5;
+                proxy_pass http://front-service.simple-us.svc.cluster.local;
+                proxy_set_header Host $host;
+            }
+        }
+    }
+    events {
+      worker_connections 1024;
+    }

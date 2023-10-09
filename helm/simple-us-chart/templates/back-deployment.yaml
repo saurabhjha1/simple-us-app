@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: back
+  namespace: simple-us
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: back
+  template:
+    metadata:
+      labels:
+        app: back
+    spec:
+      containers:
+      - name: back
+        image: {{ .Values.back.image.repository }}:{{ .Values.back.image.tag }}
+        env:
+        - name: INJECT_ERROR_RATE
+          value: {{ .Values.back.env.INJECT_ERROR_RATE | quote }}
+        - name: INJECT_BUSY_WAIT_SECONDS
+          value: {{ .Values.back.env.INJECT_BUSY_WAIT_SECONDS | quote }}
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: {{ .Values.back.resources.limits.cpu | quote }}
+            memory: {{ .Values.back.resources.limits.memory | quote }}
+          requests:
+            cpu: {{ .Values.back.resources.requests.cpu | quote }}
+            memory: {{ .Values.back.resources.limits.memory | quote }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30

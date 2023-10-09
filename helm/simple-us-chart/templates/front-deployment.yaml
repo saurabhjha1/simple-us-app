@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front
+  namespace: simple-us
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      labels:
+        app: front
+    spec:
+      containers:
+      - name: front
+        image: {{ .Values.front.image.repository }}:{{ .Values.front.image.tag }}
+        env:
+        - name: SINGLE_US
+          value: {{ .Values.front.env.SINGLE_US | quote }}
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: {{ .Values.front.resources.limits.cpu | quote }}
+            memory: {{ .Values.front.resources.limits.memory | quote }}
+          requests:
+            cpu: {{ .Values.front.resources.requests.cpu | quote }}
+            memory: {{ .Values.front.resources.limits.memory | quote }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30

@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  back:
+    build: ./back-service
+    image: saurabhjha1/simple-us-app-back:latest
+    ports:
+      - "8080"
+    networks:
+      - custom_network
+
+  front:
+    build: ./front-service
+    image: saurabhjha1/simple-us-app-front:latest
+    depends_on:
+      - back
+    ports:
+      - "8080:8080"  # Expose to the host
+    networks:
+      - custom_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'  # 100m
+          memory: 100M
+        reservations:
+          cpus: '0.1'
+          memory: 100M
+
+  loadgen:
+    build: ./loadgen-service
+    image: saurabhjha1/simple-us-app-loadgen:latest
+    depends_on:
+      - front
+    networks:
+      - custom_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 100M
+        reservations:
+          cpus: '0.1'
+          memory: 100M
+
+networks:
+  custom_network:

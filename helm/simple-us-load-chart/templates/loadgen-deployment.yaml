@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: simple-us-load
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+    spec:
+      containers:
+      - name: load-generator
+        image: {{ .Values.loadgen.image.repository }}:{{ .Values.loadgen.image.tag }}
+        env:
+        - name: RATE
+          value: {{ .Values.loadgen.env.RATE | quote }}
+        - name: REPORTING_INTERVAL
+          value: {{ .Values.loadgen.env.REPORTING_INTERVAL | quote }}
+        resources:
+          requests:
+            cpu: {{ .Values.loadgen.resources.requests.cpu }}
+            memory: {{ .Values.loadgen.resources.requests.memory }}
+          limits:
+            cpu: {{ .Values.loadgen.resources.limits.cpu }}
+            memory: {{ .Values.loadgen.resources.limits.memory }}

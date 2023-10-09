@@ -1,0 +1,14 @@
+loadgen:
+  image:
+    repository: saurabhjha1/simple-us-app-loadgen
+    tag: latest
+  env:
+    RATE: "100"
+    REPORTING_INTERVAL: "30"
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "100Mi"
+    limits:
+      cpu: "500m"
+      memory: "100Mi"
