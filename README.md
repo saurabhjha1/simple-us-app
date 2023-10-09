@@ -1,4 +1,4 @@
-# python-singleton-demo-app
+# us-demo-app
 
 ## Description
 
