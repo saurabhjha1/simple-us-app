@@ -12,6 +12,13 @@ spec:
       labels:
         app: nginx-rate-limiter
     spec:
+      initContainers:
+        - name: check-back-service
+          image: busybox
+          command:
+          - sh
+          - -c
+          - "until wget -q -O - http://front-service:80/ > /dev/null; do echo 'Waiting for back-service'; sleep 5; done" 
       containers:
       - name: nginx
         image: nginx:1.19
@@ -21,7 +28,7 @@ spec:
             memory: {{ .Values.nginx.resources.limits.memory | quote }}
           requests:
             cpu: {{ .Values.nginx.resources.requests.cpu | quote }}
-            memory: {{ .Values.nginx.resources.limits.memory | quote }}
+            memory: {{ .Values.nginx.resources.requests.memory | quote }}
         ports:
         - containerPort: 80
         volumeMounts:

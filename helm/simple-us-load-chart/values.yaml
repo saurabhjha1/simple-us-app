@@ -8,7 +8,7 @@ loadgen:
   resources:
     requests:
       cpu: "500m"
-      memory: "100Mi"
+      memory: "500Mi"
     limits:
       cpu: "500m"
-      memory: "100Mi"
+      memory: "500Mi"

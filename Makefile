@@ -3,27 +3,25 @@
 SINGLE_US ?= false
 INJECT_ERROR_RATE ?= 0
 INJECT_BUSY_WAIT_SECONDS ?= 0
-RATE ?= 100
-NGINX_RATE_LIMIT ?= 100 # r/s
+RATE ?= 10
+NGINX_RATE_LIMIT ?= 50 # r/s
 NGINX_ZONE_SIZE ?= 100 # in mb
 
 NGINX_REQUEST_CPU ?= 100m
-NGINX_REQUEST_MEMORY ?= 256Mi
+NGINX_LIMIT_CPU ?= 100m
+NGINX_REQUEST_MEMORY ?= 512Mi
+NGINX_LIMIT_MEMORY ?= 512Mi
 
-FRONT_REQUEST_CPU ?= 100m
-FRONT_REQUEST_MEMORY ?= 256Mi
+FRONT_REQUEST_CPU ?= 200m
+FRONT_LIMIT_CPU ?= 200m
+FRONT_REQUEST_MEMORY ?= 512Mi
+FRONT_LIMIT_MEMORY ?= 512Mi
+
 
 BACK_REQUEST_CPU ?= 100m
-BACK_REQUEST_MEMORY ?= 256Mi
-
-NGINX_LIMIT_CPU ?= 100m
-NGINX_LIMIT_MEMORY ?= 256Mi
-
-FRONT_LIMIT_CPU ?= 100m
-FRONT_LIMIT_MEMORY ?= 256Mi
-
 BACK_LIMIT_CPU ?= 100m
-BACK_LIMIT_MEMORY ?= 256Mi
+BACK_REQUEST_MEMORY ?= 512Mi
+BACK_LIMIT_MEMORY ?= 512Mi
 
 build:
 	echo "start build";
@@ -46,16 +44,16 @@ install-app:
 		--set nginx.rateLimit.zoneSize=$(NGINX_ZONE_SIZE) \
 		--set back.resources.requests.cpu=$(BACK_REQUEST_CPU) \
 		--set back.resources.requests.memory=$(BACK_REQUEST_MEMORY) \
-		--set back.resources.limit.cpu=$(BACK_REQUEST_CPU) \
-		--set back.resources.limit.memory=$(BACK_REQUEST_MEMORY) \
-		--set front.resources.requests.cpu=$(BACK_REQUEST_CPU) \
-		--set front.resources.requests.memory=$(BACK_REQUEST_MEMORY) \
-		--set front.resources.limit.cpu=$(BACK_REQUEST_CPU) \
-		--set front.resources.limit.memory=$(BACK_REQUEST_MEMORY) \
-		--set nginx.resources.requests.cpu=$(BACK_REQUEST_CPU) \
-		--set nginx.resources.requests.memory=$(BACK_REQUEST_MEMORY) \
-		--set nginx.resources.limit.cpu=$(BACK_REQUEST_CPU) \
-		--set nginx.resources.limit.memory=$(BACK_REQUEST_MEMORY) 
+		--set back.resources.limits.cpu=$(BACK_LIMIT_CPU) \
+		--set back.resources.limits.memory=$(BACK_LIMIT_MEMORY) \
+		--set front.resources.requests.cpu=$(FRONT_REQUEST_CPU) \
+		--set front.resources.requests.memory=$(FRONT_REQUEST_MEMORY) \
+		--set front.resources.limits.cpu=$(FRONT_LIMIT_CPU) \
+		--set front.resources.limits.memory=$(FRONT_LIMIT_MEMORY) \
+		--set nginx.resources.requests.cpu=$(NGINX_REQUEST_CPU) \
+		--set nginx.resources.requests.memory=$(NGINX_REQUEST_MEMORY) \
+		--set nginx.resources.limits.cpu=$(NGINX_LIMIT_CPU) \
+		--set nginx.resources.limits.memory=$(NGINX_LIMIT_MEMORY) 
 
 install-loadgen:
 	@echo RATE $(RATE)
@@ -71,10 +69,7 @@ expose-app:
 	kubectl port-forward -n simple-us svc/nginx 4040:80 --address 0.0.0.0
 
 status:
-	kubectl get ns | grep "simple-us"
-
 	kubectl get ns simple-us && kubectl get pods -n simple-us
-	
 	kubectl get ns simple-us-load && kubectl get pods -n simple-us-load
 
 

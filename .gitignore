@@ -1,1 +1,3 @@
 __pycache__/*
+analysis/exports/*
+analysis/config.json

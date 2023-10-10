@@ -13,6 +13,13 @@ spec:
       labels:
         app: front
     spec:
+      initContainers:
+        - name: check-back-service
+          image: busybox
+          command:
+          - sh
+          - -c
+          - "until wget -q -O - http://back-service:80/ > /dev/null; do echo 'Waiting for back-service'; sleep 5; done" 
       containers:
       - name: front
         image: {{ .Values.front.image.repository }}:{{ .Values.front.image.tag }}
@@ -27,10 +34,11 @@ spec:
             memory: {{ .Values.front.resources.limits.memory | quote }}
           requests:
             cpu: {{ .Values.front.resources.requests.cpu | quote }}
-            memory: {{ .Values.front.resources.limits.memory | quote }}
+            memory: {{ .Values.front.resources.requests.memory | quote }}
         livenessProbe:
           httpGet:
             path: /
             port: 8080
           initialDelaySeconds: 30
-          periodSeconds: 30
+          periodSeconds: 60
+          timeoutSeconds: 30

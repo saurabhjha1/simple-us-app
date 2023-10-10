@@ -29,10 +29,11 @@ spec:
             memory: {{ .Values.back.resources.limits.memory | quote }}
           requests:
             cpu: {{ .Values.back.resources.requests.cpu | quote }}
-            memory: {{ .Values.back.resources.limits.memory | quote }}
+            memory: {{ .Values.back.resources.requests.memory | quote }}
         livenessProbe:
           httpGet:
             path: /
             port: 8080
           initialDelaySeconds: 30
-          periodSeconds: 30
+          periodSeconds: 60
+          timeoutSeconds: 30
