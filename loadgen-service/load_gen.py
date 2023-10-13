@@ -15,9 +15,9 @@ async def user_workflow(session, histogram):
     # Generate a random string of 100 characters
     random_str = ''.join(random.choices(string.ascii_letters + string.digits, k=100))
     
-    # First request to demo-service in singleton-app namespace
-    async with session.get('http://nginx.simple-us.svc.cluster.local') as response:
-        await response.read()
+    # # First request to demo-service in singleton-app namespace
+    # async with session.get('http://nginx.simple-us.svc.cluster.local') as response:
+    #     await response.read()
     
     # Second request to demo-service in singleton-app namespace for encoding
     async with session.get(f'http://nginx.simple-us.svc.cluster.local/encode/{random_str}') as response:
