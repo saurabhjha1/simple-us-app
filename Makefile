@@ -24,6 +24,7 @@ BACK_REQUEST_MEMORY ?= 512Mi
 BACK_LIMIT_MEMORY ?= 512Mi
 
 NAMESPACE ?= simple-us
+#simple-us-scale
 
 build:
 	echo "start build";
@@ -67,20 +68,21 @@ install-app:
 
 install-loadgen:
 	@echo RATE $(RATE)
-	helm install simple-us-load helm/simple-us-load-chart/ --set loadgen.env.FRONTEND_SERVICE="http://nginx.${NAMESPACE}.svc.cluster.local" --set loadgen.env.RATE=$(RATE) -n ${NAMESPACE}-load --create-namespace
+	kubectl get namespace ${NAMESPACE}-load || kubectl create namespace ${NAMESPACE}-load
+	helm install simple-us-load --namespace=${NAMESPACE}-load helm/simple-us-load-chart/ --set loadgen.env.FRONTEND_SERVICE="http://nginx.${NAMESPACE}.svc.cluster.local" --set loadgen.env.RATE=$(RATE) 
 
 uninstall-app:
 	helm uninstall simple-us -n ${NAMESPACE}
 
 uninstall-loadgen:
-	helm uninstall ${NAMESPACE}-load -n simple-us-load
+	helm uninstall simple-us-load -n ${NAMESPACE}-load
 
 expose-app:
 	kubectl port-forward -n simple-us svc/nginx 4040:80 --address 0.0.0.0
 
 status:
-	kubectl get ns simple-us && kubectl get pods -n simple-us
-	kubectl get ns simple-us-load && kubectl get pods -n simple-us-load
+	kubectl get ns ${NAMESPACE} && kubectl get pods -n ${NAMESPACE}
+	kubectl get ns ${NAMESPACE}-load && kubectl get pods -n ${NAMESPACE}-load
 
 
 uninstall: uninstall-app uninstall-loadgen

@@ -9,7 +9,8 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: otel-collector
+  # Append namespace to make the name unique across the cluster
+  name: otel-collector-{{ .Release.Namespace }}
 rules:
   - apiGroups: [""]
     resources: ["pods", "namespaces", "nodes", "events"]
@@ -25,12 +26,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: otel-collector
+  # Append namespace to make the name unique across the cluster
+  name: otel-collector-{{ .Release.Namespace }}
 subjects:
   - kind: ServiceAccount
     name: otel-collector
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: otel-collector
+  # Ensure the roleRef name matches the modified ClusterRole name
+  name: otel-collector-{{ .Release.Namespace }}
   apiGroup: rbac.authorization.k8s.io

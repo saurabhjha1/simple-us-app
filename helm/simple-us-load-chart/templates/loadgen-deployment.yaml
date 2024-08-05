@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: load-generator
-  namespace: simple-us-load
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
