@@ -19,6 +19,8 @@ spec:
         env:
         - name: RATE
           value: {{ .Values.loadgen.env.RATE | quote }}
+        - name: FRONTEND_SERVICE
+          value: {{ .Values.loadgen.env.FRONTEND_SERVICE | quote }}
         - name: REPORTING_INTERVAL
           value: {{ .Values.loadgen.env.REPORTING_INTERVAL | quote }}
         resources:

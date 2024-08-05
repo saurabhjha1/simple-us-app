@@ -9,7 +9,7 @@ from pprint import pprint
 import numpy as np
 
 
-async def user_workflow(session, histogram):
+async def user_workflow(session, histogram, frontend_service):
     start_time = time.time()
     
     # Generate a random string of 100 characters
@@ -20,7 +20,7 @@ async def user_workflow(session, histogram):
     #     await response.read()
     
     # Second request to demo-service in singleton-app namespace for encoding
-    async with session.get(f'http://nginx.simple-us.svc.cluster.local/encode/{random_str}') as response:
+    async with session.get(f'{frontend_service}/encode/{random_str}') as response:
         await response.read()
     
     end_time = time.time()
@@ -42,23 +42,24 @@ async def update_histogram(histogram, interval):
 
         histogram.clear()
 """
-async def load_generator(rate, histogram):
+async def load_generator(rate, histogram, frontend_service):
     async with ClientSession() as session:
         while True:
             start_time = time.time()
-            asyncio.create_task(user_workflow(session, histogram))
+            asyncio.create_task(user_workflow(session, histogram, frontend_service))
             elapsed = time.time() - start_time
             await asyncio.sleep(max(0, 1.0 / rate - elapsed))
 
 if __name__ == "__main__":
     rate = int(os.environ.get('RATE', "1000"))
     interval = int(os.environ.get('REPORTING_INTERVAL', "30"))
+    frontend_service = os.environ.get('FRONTEND_SERVICE', "http://nginx.simple-us.svc.cluster.local")
     print(f"Starting load generator with rate: {rate} and reporting interval: {interval}")
     histogram = deque()
     
     loop = asyncio.get_event_loop()
     loop.run_until_complete(asyncio.gather(
-        load_generator(rate, histogram)
+        load_generator(rate, histogram, frontend_service)
         #,
         #update_histogram(histogram, interval)
     ))

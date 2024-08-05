@@ -23,6 +23,8 @@ BACK_LIMIT_CPU ?= 100m
 BACK_REQUEST_MEMORY ?= 512Mi
 BACK_LIMIT_MEMORY ?= 512Mi
 
+NAMESPACE ?= simple-us
+
 build:
 	echo "start build";
 	docker buildx create --name simple-us-app-builder --use;
@@ -39,12 +41,12 @@ push:
 
 
 install-app:
-	kubectl get namespace simple-us || kubectl create namespace simple-us
-	kubectl label namespace simple-us istio-injection=enabled --overwrite
+	kubectl get namespace ${NAMESPACE} || kubectl create namespace ${NAMESPACE}
+	kubectl label namespace ${NAMESPACE} istio-injection=enabled --overwrite
 	@echo SINGLE_US $(SINGLE_US)
 	@echo INJECT_BUSY_WAIT_SECONDS $(INJECT_BUSY_WAIT_SECONDS)
 	@echo INJECT_ERROR_RATE $(INJECT_ERROR_RATE)
-	helm install simple-us -n simple-us helm/simple-us-chart/ \
+	helm install simple-us -n ${NAMESPACE} helm/simple-us-chart/ \
 		--set front.env.SINGLE_US=$(SINGLE_US) \
 		--set back.env.INJECT_ERROR_RATE=$(INJECT_ERROR_RATE) \
 		--set back.env.INJECT_BUSY_WAIT_SECONDS=$(INJECT_BUSY_WAIT_SECONDS) \
@@ -65,13 +67,13 @@ install-app:
 
 install-loadgen:
 	@echo RATE $(RATE)
-	helm install simple-us-load helm/simple-us-load-chart/ --set loadgen.env.RATE=$(RATE) -n simple-us-load --create-namespace
+	helm install simple-us-load helm/simple-us-load-chart/ --set loadgen.env.FRONTEND_SERVICE="http://nginx.${NAMESPACE}.svc.cluster.local" --set loadgen.env.RATE=$(RATE) -n ${NAMESPACE}-load --create-namespace
 
 uninstall-app:
-	helm uninstall simple-us -n simple-us
+	helm uninstall simple-us -n ${NAMESPACE}
 
 uninstall-loadgen:
-	helm uninstall simple-us-load -n simple-us-load
+	helm uninstall ${NAMESPACE}-load -n simple-us-load
 
 expose-app:
 	kubectl port-forward -n simple-us svc/nginx 4040:80 --address 0.0.0.0

@@ -5,6 +5,7 @@ loadgen:
   env:
     RATE: "100"
     REPORTING_INTERVAL: "30"
+    FRONTEND_SERVICE: "http://nginx.simple-us.svc.cluster.local"
   resources:
     requests:
       cpu: "500m"
