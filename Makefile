@@ -25,10 +25,18 @@ BACK_LIMIT_MEMORY ?= 512Mi
 
 build:
 	echo "start build";
-	docker-compose build
+	docker buildx create --name simple-us-app-builder --use;
+	docker buildx inspect --bootstrap;
+	docker buildx build --platform linux/amd64,linux/arm64 -t saurabhjha1/simple-us-app-back:latest --push ./back-service
+	docker buildx build --platform linux/amd64,linux/arm64 -t saurabhjha1/simple-us-app-front:latest --push ./front-service
+	docker buildx build --platform linux/amd64,linux/arm64 -t saurabhjha1/simple-us-app-loadgen:latest --push ./loadgen-service
+
 
 push:
-	docker-compose push
+	docker buildx build --platform linux/amd64,linux/arm64 -t saurabhjha1/simple-us-app-back:latest --push ./back-service
+	docker buildx build --platform linux/amd64,linux/arm64 -t saurabhjha1/simple-us-app-front:latest --push ./front-service
+	docker buildx build --platform linux/amd64,linux/arm64 -t saurabhjha1/simple-us-app-loadgen:latest --push ./loadgen-service
+
 
 install-app:
 	kubectl get namespace simple-us || kubectl create namespace simple-us

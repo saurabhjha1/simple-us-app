@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: back
-  namespace: simple-us
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
@@ -16,11 +16,42 @@ spec:
       containers:
       - name: back
         image: {{ .Values.back.image.repository }}:{{ .Values.back.image.tag }}
+        command:
+          {{- if .Values.otel.enabled }}
+          - "opentelemetry-instrument"
+          - "--log_level"
+          - "debug"
+          - "python"
+          - "app.py"
+          {{- else }}
+          - "python"
+          - "app.py"
+          {{- end }}
         env:
         - name: INJECT_ERROR_RATE
           value: {{ .Values.back.env.INJECT_ERROR_RATE | quote }}
         - name: INJECT_BUSY_WAIT_SECONDS
           value: {{ .Values.back.env.INJECT_BUSY_WAIT_SECONDS | quote }}
+        - name: OTEL_SERVICE_NAME
+          value: back-service
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector.{{ .Release.Namespace }}.svc.cluster.local:4317"
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: "grpc"
+        - name: OTEL_EXPORTER_OTLP_INSECURE
+          value: "true"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "service.name=$(OTEL_SERVICE_NAME),k8s.namespace.name=$(POD_NAMESPACE),k8s.pod.name=$(POD_NAME)"
+        - name: OTEL_PYTHON_DISABLED_INSTRUMENTATIONS
+          value: "aws_lambda"
         ports:
         - containerPort: 8080
         resources:

@@ -1,3 +1,7 @@
+otel:
+  enabled: true
+otelCollector:
+  exporterEndpoint: "instana-agent.instana-agent:4317"
 front:
   image:
     repository: saurabhjha1/simple-us-app-front

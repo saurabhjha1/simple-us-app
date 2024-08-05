@@ -4,11 +4,13 @@ import requests
 import os
 import logging
 
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 
 SINGLE_US = os.environ.get('SINGLE_US', "false").lower() == "true"
 
 app = Flask(__name__)
-
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 

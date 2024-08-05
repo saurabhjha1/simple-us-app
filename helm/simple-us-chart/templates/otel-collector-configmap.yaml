@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: {{ .Release.Namespace }}
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc: 
+            endpoint: "0.0.0.0:4317"
+          http:
+            endpoint: "0.0.0.0:4318"
+            cors:
+              allowed_origins:
+                - "http://*"
+                - "https://*"
+
+    processors:
+      batch: {}
+      k8sattributes:
+        auth_type: "serviceAccount"
+        passthrough: false
+        extract:
+          metadata:
+            - k8s.namespace.name
+            - k8s.deployment.name
+            - k8s.statefulset.name
+            - k8s.daemonset.name
+            - k8s.cronjob.name
+            - k8s.job.name
+            - k8s.node.name
+            - k8s.pod.name
+            - k8s.pod.uid
+            - k8s.pod.start_time
+            - container.id
+          labels:
+            - tag_name: key1
+              key: label1
+              from: pod
+            - tag_name: key2
+              key: label2
+              from: pod
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.ip
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.uid
+          - sources:
+              - from: connection
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 1000
+        spike_limit_mib: 200
+      resource:
+        attributes:
+        - action: insert
+          from_attribute: k8s.pod.uid
+          key: service.instance.id
+
+    exporters:
+      logging:
+        loglevel: debug
+      otlp:
+        endpoint: "{{ .Values.otelCollector.exporterEndpoint }}"
+        tls:
+          insecure: true
+
+    service:
+      pipelines:
+        logs:
+          exporters:
+          - otlp
+          - logging
+          processors:
+          - k8sattributes
+          - resource
+          - batch
+          receivers:
+          - otlp
+        metrics:
+          exporters:
+          - otlp
+          - logging
+          processors:
+          - k8sattributes
+          - resource
+          - batch
+          receivers:
+          - otlp
+        traces:
+          exporters:
+          - otlp
+          - logging
+          processors:
+          - k8sattributes
+          - resource
+          - batch
+          receivers:
+          - otlp

@@ -2,15 +2,28 @@ version: '3.8'
 
 services:
   back:
-    build: ./back-service
+    build:
+      context: ./back-service
+      platforms:
+        - linux/amd64
+        - linux/arm64
     image: saurabhjha1/simple-us-app-back:latest
     ports:
       - "8080"
     networks:
       - custom_network
+    environment:
+      - OTEL_SERVICE_NAME=back-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317
+      - OTEL_EXPORTER_OTLP_INSECURE=true
+    command: ["opentelemetry-instrument", "--log_level", "debug", "python", "app.py"]
 
   front:
-    build: ./front-service
+    build:
+      context: ./front-service
+      platforms:
+        - linux/amd64
+        - linux/arm64
     image: saurabhjha1/simple-us-app-front:latest
     depends_on:
       - back
@@ -26,9 +39,18 @@ services:
         reservations:
           cpus: '0.1'
           memory: 100M
+    environment:
+      - OTEL_SERVICE_NAME=front-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317
+      - OTEL_EXPORTER_OTLP_INSECURE=true
+    command: ["opentelemetry-instrument", "--log_level", "debug", "python", "app.py"]
 
   loadgen:
-    build: ./loadgen-service
+    build:
+      context: ./loadgen-service
+      platforms:
+        - linux/amd64
+        - linux/arm64
     image: saurabhjha1/simple-us-app-loadgen:latest
     depends_on:
       - front
