@@ -1,7 +1,7 @@
 otel:
   enabled: true
 otelCollector:
-  exporterEndpoint: "instana-agent.instana-agent:4317"
+  exporterEndpoint: jaeger-collector.jaeger.svc.cluster.local:4317 #"instana-agent.instana-agent:4317"
 front:
   image:
     repository: saurabhjha1/simple-us-app-front

@@ -16,9 +16,15 @@ data:
               allowed_origins:
                 - "http://*"
                 - "https://*"
+      otlp/spanmetrics:
+        protocols:
+          grpc:
+            endpoint: "localhost:65535"
 
     processors:
       batch: {}
+      spanmetrics:
+        metrics_exporter: prometheus
       k8sattributes:
         auth_type: "serviceAccount"
         passthrough: false
@@ -68,29 +74,31 @@ data:
         endpoint: "{{ .Values.otelCollector.exporterEndpoint }}"
         tls:
           insecure: true
+      prometheus:
+        endpoint: "0.0.0.0:8899"
 
     service:
       pipelines:
-        logs:
-          exporters:
-          - otlp
-          - logging
-          processors:
-          - k8sattributes
-          - resource
-          - batch
-          receivers:
-          - otlp
-        metrics:
-          exporters:
-          - otlp
-          - logging
-          processors:
-          - k8sattributes
-          - resource
-          - batch
-          receivers:
-          - otlp
+        # logs:
+        #   exporters:
+        #   - otlp
+        #   - logging
+        #   processors:
+        #   - k8sattributes
+        #   - resource
+        #   - batch
+        #   receivers:
+        #   - otlp
+        # metrics:
+        #   exporters:
+        #   - otlp
+        #   - logging
+        #   processors:
+        #   - k8sattributes
+        #   - resource
+        #   - batch
+        #   receivers:
+        #   - otlp
         traces:
           exporters:
           - otlp
@@ -99,5 +107,9 @@ data:
           - k8sattributes
           - resource
           - batch
+          - spanmetrics
           receivers:
           - otlp
+        metrics/spanmetrics:
+          receivers: [otlp/spanmetrics]
+          exporters: [prometheus]
