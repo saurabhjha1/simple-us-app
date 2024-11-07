@@ -1,7 +1,7 @@
 .PHONY: build push install-app uninstall-app install-loadgen uninstall-loadgen
 
 SINGLE_US ?= false
-INJECT_ERROR_RATE ?= 0
+INJECT_ERROR_RATE ?= 0.0
 INJECT_BUSY_WAIT_SECONDS ?= 0
 RATE ?= 5
 NGINX_RATE_LIMIT ?= 50 # r/s

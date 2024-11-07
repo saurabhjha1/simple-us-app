@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: otel-collector
   namespace: {{ .Release.Namespace }}
-  labels:
-    app: otel-collector
 spec:
   replicas: 1
   selector:
